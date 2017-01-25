@@ -43,8 +43,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SearchExecutor.cs" />
+    <Compile Include="SearchOperation\AllSearchOperation.cs" />
+    <Compile Include="SearchOperation\CppSearchOperation.cs" />
+    <Compile Include="FileScanner.cs" />
+    <Compile Include="SearchOperation\ISearchOperation.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SearchOperation\Reversed1SearchOperation.cs" />
+    <Compile Include="SearchOperation\Reversed2SearchOperation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using FilePathWriter.SearchOperation;
 
 namespace FilePathWriter
@@ -12,28 +13,30 @@ namespace FilePathWriter
         private const string Cpp = "cpp";
         private const string Reversed1 = "reversed1";
         private const string Reversed2 = "reversed2";
+        private const string DefaultFileName = "results.txt";
 
         static void Main(string[] args)
         {
             string sourcePath = args[0];
             string option = args[1];
-            string savePath;
+            string savePath = Path.Combine(sourcePath, DefaultFileName);
             if (args.Length == 3)
             {
                 savePath = args[2];
             }
-            savePath = sourcePath + "\\results.txt"; //todo change!!!
 
-            bool valid = ValidatePath(sourcePath);
+            bool valid = ValidateSourcePath(sourcePath);
             valid &= ValidateOption(option);
-//            valid &= ValidatePath(savePath);
+            valid &= ValidateSavePath(savePath);
 
             if (valid)
             {
                 var operation = GetSearchOperation(option);
                 SearchExecutor executor = new SearchExecutor(operation, sourcePath);
                 List<string> result = executor.Execute();
-                WriteResult(result);
+                WriteResult(savePath, result);
+
+                Console.WriteLine("Completed");
             }
         }
 
@@ -59,11 +62,11 @@ namespace FilePathWriter
             return result;
         }
 
-        //todo implement
-        private static bool WriteResult(IEnumerable<string> pathList)
+        private static void WriteResult(string writePath, IEnumerable<string> pathList)
         {
-
-            return true;
+            var fileStream = File.Create(writePath);
+            fileStream.Close();
+            File.WriteAllLines(writePath, pathList, Encoding.Default);
         }
 
         private static bool ValidateOption(string option)
@@ -72,18 +75,36 @@ namespace FilePathWriter
 
             if (!operations.Contains(option))
             {
-                throw new ArgumentException("Invalid parameter: " + option);
+                Console.WriteLine("Invalid option: " + option);
+                return false;
             }
             return true;
         }
 
-        private static bool ValidatePath(string path)
+        private static bool ValidateSourcePath(string path)
         {
             if (!Directory.Exists(path))
             {
-                throw new ArgumentException("Invalid parameter: " + path);
+                Console.WriteLine("Invalid source path: " + path);
+                return false;
             }
-
+            return true;
+        }
+        
+        private static bool ValidateSavePath(string path)
+        {
+            if (path != null)
+            {
+                string directoryName = Path.GetDirectoryName(path);
+                string fileName = Path.GetFileName(path);
+                
+                if (!Directory.Exists(directoryName) || string.IsNullOrEmpty(fileName))
+                {
+                    Console.WriteLine("Invalid save path: " + path);
+                    return false;
+                }
+            }
+            
             return true;
         }
     }

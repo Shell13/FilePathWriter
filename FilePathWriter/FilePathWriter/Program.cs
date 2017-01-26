@@ -15,25 +15,23 @@ namespace FilePathWriter
         private const string Reversed2 = "reversed2";
         private const string DefaultFileName = "results.txt";
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            string sourcePath = args[0];
-            string option = args[1];
-            string savePath = Path.Combine(sourcePath, DefaultFileName);
+            var sourcePath = args[0];
+            var option = args[1];
+            var savePath = Path.Combine(sourcePath, DefaultFileName);
             if (args.Length == 3)
-            {
                 savePath = args[2];
-            }
 
-            bool valid = ValidateSourcePath(sourcePath);
+            var valid = ValidateSourcePath(sourcePath);
             valid &= ValidateOption(option);
             valid &= ValidateSavePath(savePath);
 
             if (valid)
             {
                 var operation = GetSearchOperation(option);
-                SearchExecutor executor = new SearchExecutor(operation, sourcePath);
-                List<string> result = executor.Execute();
+                var executor = new SearchExecutor(operation, sourcePath);
+                var result = executor.Execute();
                 WriteResult(savePath, result);
 
                 Console.WriteLine("Completed");
@@ -64,9 +62,8 @@ namespace FilePathWriter
 
         private static void WriteResult(string writePath, IEnumerable<string> pathList)
         {
-            var fileStream = File.Create(writePath);
-            fileStream.Close();
-            File.WriteAllLines(writePath, pathList, Encoding.Default);
+            File.Create(writePath).Close();
+            File.WriteAllLines(writePath, pathList, Encoding.UTF8);
         }
 
         private static bool ValidateOption(string option)
@@ -90,21 +87,20 @@ namespace FilePathWriter
             }
             return true;
         }
-        
+
         private static bool ValidateSavePath(string path)
         {
             if (path != null)
             {
-                string directoryName = Path.GetDirectoryName(path);
-                string fileName = Path.GetFileName(path);
-                
+                var directoryName = Path.GetDirectoryName(path);
+                var fileName = Path.GetFileName(path);
+
                 if (!Directory.Exists(directoryName) || string.IsNullOrEmpty(fileName))
                 {
                     Console.WriteLine("Invalid save path: " + path);
                     return false;
                 }
             }
-            
             return true;
         }
     }

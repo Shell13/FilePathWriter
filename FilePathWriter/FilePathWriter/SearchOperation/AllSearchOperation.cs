@@ -2,7 +2,7 @@
 
 namespace FilePathWriter.SearchOperation
 {
-    class AllSearchOperation : ISearchOperation
+    public class AllSearchOperation : ISearchOperation
     {
         public List<string> GetPathList(string dirSrc)
         {

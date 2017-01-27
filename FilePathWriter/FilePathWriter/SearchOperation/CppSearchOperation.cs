@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace FilePathWriter.SearchOperation
 {
-    class CppSearchOperation : ISearchOperation
+    public class CppSearchOperation : ISearchOperation
     {
         public List<string> GetPathList(string dirSrc)
         {

@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace FilePathWriter.SearchOperation
 {
-    class Reversed2SearchOperation : ISearchOperation
+    public class Reversed2SearchOperation : ISearchOperation
     {
         public List<string> GetPathList(string dirSrc)
         {
@@ -12,7 +12,7 @@ namespace FilePathWriter.SearchOperation
             return files;
         }
 
-        private List<string> ReversePathString(List<string> pathList)
+        public List<string> ReversePathString(List<string> pathList)
         {
             List<string> result = new List<string>();
 

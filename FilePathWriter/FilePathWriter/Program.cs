@@ -15,15 +15,11 @@ namespace FilePathWriter
         private const string Reversed1 = "reversed1";
         private const string Reversed2 = "reversed2";
         private const string DefaultFileName = "results.txt";
+        private static IContainer container;
 
         public static void Main(string[] args)
         {
-            var builder = new ContainerBuilder();
-            builder.RegisterType<AllSearchOperation>().Named<ISearchOperation>(All);
-            builder.RegisterType<CppSearchOperation>().Named<ISearchOperation>(Cpp);
-            builder.RegisterType<Reversed1SearchOperation>().Named<ISearchOperation>(Reversed1);
-            builder.RegisterType<Reversed2SearchOperation>().Named<ISearchOperation>(Reversed2);
-            var container = builder.Build();
+            ConfigureDependencies();
 
             var sourcePath = args[0];
             var option = args[1];
@@ -44,6 +40,16 @@ namespace FilePathWriter
 
                 Console.WriteLine("Completed");
             }
+        }
+
+        private static void ConfigureDependencies()
+        {
+            ContainerBuilder builder = new ContainerBuilder();
+            builder.RegisterType<AllSearchOperation>().Named<ISearchOperation>(All);
+            builder.RegisterType<CppSearchOperation>().Named<ISearchOperation>(Cpp);
+            builder.RegisterType<Reversed1SearchOperation>().Named<ISearchOperation>(Reversed1);
+            builder.RegisterType<Reversed2SearchOperation>().Named<ISearchOperation>(Reversed2);
+            container = builder.Build();
         }
         
         private static void WriteResult(string writePath, IEnumerable<string> pathList)

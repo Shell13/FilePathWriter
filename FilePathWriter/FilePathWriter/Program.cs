@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Autofac;
 using FilePathWriter.SearchOperation;
 
 namespace FilePathWriter
@@ -17,6 +18,13 @@ namespace FilePathWriter
 
         public static void Main(string[] args)
         {
+            var builder = new ContainerBuilder();
+            builder.RegisterType<AllSearchOperation>().Named<ISearchOperation>(All);
+            builder.RegisterType<CppSearchOperation>().Named<ISearchOperation>(Cpp);
+            builder.RegisterType<Reversed1SearchOperation>().Named<ISearchOperation>(Reversed1);
+            builder.RegisterType<Reversed2SearchOperation>().Named<ISearchOperation>(Reversed2);
+            var container = builder.Build();
+
             var sourcePath = args[0];
             var option = args[1];
             var savePath = Path.Combine(sourcePath, DefaultFileName);
@@ -29,7 +37,7 @@ namespace FilePathWriter
 
             if (valid)
             {
-                var operation = GetSearchOperation(option);
+                var operation = container.ResolveNamed<ISearchOperation>(option);
                 var executor = new SearchExecutor(operation, sourcePath);
                 var result = executor.Execute();
                 WriteResult(savePath, result);
@@ -37,29 +45,7 @@ namespace FilePathWriter
                 Console.WriteLine("Completed");
             }
         }
-
-        private static ISearchOperation GetSearchOperation(string option)
-        {
-            ISearchOperation result = null;
-
-            switch (option)
-            {
-                case All:
-                    result = new AllSearchOperation();
-                    break;
-                case Cpp:
-                    result = new CppSearchOperation();
-                    break;
-                case Reversed1:
-                    result = new Reversed1SearchOperation();
-                    break;
-                case Reversed2:
-                    result = new Reversed2SearchOperation();
-                    break;
-            }
-            return result;
-        }
-
+        
         private static void WriteResult(string writePath, IEnumerable<string> pathList)
         {
             File.Create(writePath).Close();

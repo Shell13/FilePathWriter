@@ -2,71 +2,57 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FilePathWriter
 {
     public static class FileScanner
     {
+        private static readonly List<string> PathesList = new List<string>();
+
         public static async Task<List<string>> FindAllFilesAsync(string dirSrc, string extension = "*")
         {
-            DirectoryInfo dir = new DirectoryInfo(dirSrc);
-            List<string> pathList = new List<string>();
-
             try
             {
-                pathList = await Task.Run(() => GetFilePathes(dir, extension));
+                await Task.Run(() => GetFilePathes(new DirectoryInfo(dirSrc), extension));
             }
             catch (Exception e)
             {
                 Console.WriteLine("Caught exception: " + e.Message);
             }
-            
-            return pathList;
+
+            return PathesList;
         }
 
-        private static List<string> GetFilePathes(DirectoryInfo info, string extension)
+        private static async Task GetFilePathes(DirectoryInfo info, string extension)
         {
-            List<string> pathList = new List<string>();
-
-            IEnumerable<FileInfo> fileInfos = new List<FileInfo>();
             try
             {
-                fileInfos = info.GetFiles(extension);
-            }
-            catch (UnauthorizedAccessException e)
-            {
-//                Console.WriteLine("Caught exception: " + e.Message);
-            }
+                IEnumerable<FileInfo> fileInfos = info.GetFiles(extension);
 
-            //limitation handling of the search pattern
-            // https://msdn.microsoft.com/en-us/library/wz42302f(v=vs.110).aspx#Anchor_2
-            if (fileInfos.Any() && extension != "*")
-            {
-                var ext = extension.Substring(extension.IndexOf(".", StringComparison.CurrentCulture));
-                fileInfos = fileInfos.Where(file => file.Extension == ext).ToArray();
-            }
+                //filter by extension
+                //limitation handling of the search pattern
+                // https://msdn.microsoft.com/en-us/library/wz42302f(v=vs.110).aspx#Anchor_2
+                if (fileInfos.Any() && extension != "*")
+                {
+                    var ext = extension.Substring(extension.IndexOf(".", StringComparison.CurrentCulture));
+                    fileInfos = fileInfos.Where(file => file.Extension == ext).ToArray();
+                }
 
-            var names = fileInfos.Select(f => f.FullName);
-            pathList.AddRange(names);
-            IEnumerable<DirectoryInfo> directories = new List<DirectoryInfo>();
+                var names = fileInfos.Select(f => f.FullName);
+                PathesList.AddRange(names);
+            }
+            catch (UnauthorizedAccessException) { }
 
             try
             {
-                directories = info.GetDirectories();
+                foreach (DirectoryInfo dir in info.EnumerateDirectories())
+                {
+                    await Task.Run(() => GetFilePathes(dir, extension));
+                }
             }
-            catch (UnauthorizedAccessException e)
-            {
-//                Console.WriteLine("Caught exception: " + e.Message);
-            }
-
-            foreach (DirectoryInfo dir in directories)
-            {
-                var filePathes = GetFilePathes(dir, extension);
-                pathList.AddRange(filePathes);
-            }
-
-            return pathList;
+            catch (UnauthorizedAccessException) { }
         }
     }
 }

@@ -35,10 +35,14 @@ namespace FilePathWriter
             {
                 var operation = container.ResolveNamed<ISearchOperation>(option);
                 var executor = new SearchExecutor(operation, sourcePath);
+                Console.WriteLine("Start ...");
                 var result = executor.Execute();
-                WriteResult(savePath, result);
+                bool saved = WriteResult(savePath, result);
 
-                Console.WriteLine("Completed");
+                if (saved)
+                {
+                    Console.WriteLine("Completed");
+                }
             }
         }
 
@@ -52,10 +56,21 @@ namespace FilePathWriter
             container = builder.Build();
         }
         
-        private static void WriteResult(string writePath, IEnumerable<string> pathList)
+        private static bool WriteResult(string writePath, IEnumerable<string> pathList)
         {
-            File.Create(writePath).Close();
-            File.WriteAllLines(writePath, pathList, Encoding.UTF8);
+            try
+            {
+                File.Create(writePath).Close();
+                File.WriteAllLines(writePath, pathList, Encoding.UTF8);
+                Console.WriteLine("Saved here: " + writePath);
+                return true;
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                Console.WriteLine("Failed to save results at the path: " + writePath);
+                Console.WriteLine(e.Message);
+            }
+            return false;
         }
 
         private static bool ValidateOption(string option)
